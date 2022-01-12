@@ -115,7 +115,7 @@ Sets whether to output to HTML or plaintext files.
 ## `outputPath`
 Type: string
 
-Default: `"logs`"
+Default: `"logs"`
 
 Directory where log files will be stored.
 
