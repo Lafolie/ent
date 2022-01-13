@@ -25,7 +25,7 @@ end
 
 function love.keypressed(key)
 	-- log keypresses from the player
-	log.echo(key)
+	ent.echo(key)
 end
 
 function love.quit()
