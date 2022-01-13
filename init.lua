@@ -167,7 +167,8 @@ local function deleteOldLogs()
 	-- delete files
 	for n = 1, #names - config.maxOldLogs do
 		if love.filesystem.remove(format("%s/%s", config.outputPath, names[1])) then
-			log.info("Removed old log file %s", names[1])
+			local outputf = ent.info or _print
+			outputf("Removed old log file %s", names[1])
 		end
 		table.remove(names, 1)
 	end
