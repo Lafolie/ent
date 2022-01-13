@@ -235,7 +235,7 @@ end
 
 
 function ent.print(levelid, level, str, ...)
-	str = format(str, ...)
+	str = format(tostring(str), ...)
 	
 	local time = getTime() - initTime
 	local timeStr = osDate("%H:%M:%S:", time)
