@@ -80,7 +80,7 @@ Closes the writer thread and writes any pending data (such as the HTML footer).
  ### Returns
  * `ouput` (string) : the string output to the logfile/console
 
-Output string `str` formatted by `...` to the log file and stdout.
+Outputs the string `str` formatted by `...` to the log file and stdout.
 A timestamp and the log level will be prepended to the output.
 
 This function and its cousins are created dynamically from the log levels configuration. Seven variations are available with the default configuration:

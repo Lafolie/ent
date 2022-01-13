@@ -1,5 +1,5 @@
 local reqVersion = "11.3"
-assert(love.isVersionCompatible(reqVersion), "Lovelog requires Love version " .. reqVersion .. " or greater.")
+assert(love.isVersionCompatible(reqVersion), "Ent requires Love version " .. reqVersion .. " or greater.")
 
 local ent = {}
 local insert, concat = table.insert, table.concat
@@ -18,11 +18,11 @@ local defaultConfig =
 	-- e.g. log.echo("messge")
 	logLevels = 
 	{
-		echo = {"Echo", "#aaaaaa"},
-		info = {"Info", "#2288dd"},
-		warn = {"Warning", "#dddd22"},
-		error = {"Error!", "#ff44aa"},
-		edit = {"Editor", "#88ddbb"},
+		echo   = {"Echo", "#aaaaaa"},
+		info   = {"Info", "#2288dd"},
+		warn   = {"Warning", "#dddd22"},
+		error  = {"Error!", "#ff44aa"},
+		edit   = {"Editor", "#88ddbb"},
 		client = {"NetClient", "#aaaaaa"},
 		server = {"NetServer", "#aaaaaa"},
 	},
