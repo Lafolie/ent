@@ -40,7 +40,11 @@ local defaultConfig =
 	title = love.filesystem.getIdentity(),
 
 	-- print function
-	print = print
+	print = print,
+
+	-- number of non-breaking-spaces to replace tabs with in HTML output
+	htmlTabWidth = 4
+
 }
 
 -------------------------------------------------------------------------------
@@ -132,49 +136,30 @@ local function createLog(logName, logPath)
 
 end
 
-local function getMetaPath()
-	-- ensure log meta exists
-	local metaPath = config.outputPath .. "/.entLogMeta"
-	if config.maxOldLogs > 0 then
-		local metaInfo = love.filesystem.getInfo(metaPath, "file")
-		if not metaInfo then
-			assert(love.filesystem.write(metaPath, ""), "Error creating .logMeta file")
-			_print "Created .logMeta file"
-		end
-	end
-
-	return metaPath
-end
-
-local function appendToMeta(logName)
-	if config.maxOldLogs > 0 then
-		love.filesystem.append(getMetaPath(), logName .. "\n")
-	end
-end
-
-local function deleteOldLogs()
+local function manageOldLogs(title, ext)
 	if config.maxOldLogs < 1 then
 		return
 	end
 
-	-- read meta
-	local metaPath = getMetaPath()
-	local names = {}
-	for line in love.filesystem.lines(metaPath) do
-		insert(names, line)
-	end
-
-	-- delete files
-	for n = 1, #names - config.maxOldLogs do
-		if love.filesystem.remove(format("%s/%s", config.outputPath, names[1])) then
-			local outputf = ent.info or _print
-			outputf("Removed old log file %s", names[1])
+	-- move old logs
+	local nameStr = "%s.%i." .. ext
+	for n = config.maxOldLogs - 1, 0, -1 do
+		local name = format(nameStr, title, n)
+		local path = format("%s/%s", config.outputPath, name)
+		
+		if love.filesystem.getInfo(path, "file") then
+			local oldLog = love.filesystem.read(path)
+			local newName = format(nameStr, title, n + 1)
+			love.filesystem.write(format("%s/%s", config.outputPath, newName), oldLog)
 		end
-		table.remove(names, 1)
 	end
 
-	-- rewrite meta file with old logs removed
-	love.filesystem.write(metaPath, concat(names, "\n") .. "\n")
+	-- delete oldest log
+	local name = format(nameStr, title, config.maxOldLogs)
+	if love.filesystem.remove(format("%s/%s", config.outputPath, name)) then
+		local outputf = ent.info or _print
+		outputf("Removed old log file %s", name)
+	end
 end
 
 -------------------------------------------------------------------------------
@@ -219,8 +204,8 @@ function ent.init(inConfig)
 	end
 
 	-- generate log name
-	local time = osDate("%d-%m-%Y %H-%M-%S", os.time())
-	local logName = format("%s %s.%s", config.title, time, config.useHTML and "html" or "log")
+	local ext = config.useHTML and "html" or "log"
+	local logName = format("%s.0.%s", config.title, ext)
 	local logPath = format("%s/%s", config.outputPath, logName)
 
 
@@ -228,9 +213,8 @@ function ent.init(inConfig)
 	logWriter:start(logPath)
 
 	--create the file
+	manageOldLogs(config.title, ext)
 	createLog(logName, logPath)
-	appendToMeta(logName)
-	deleteOldLogs()
 end
 
 
@@ -251,7 +235,7 @@ function ent.print(levelid, level, str, ...)
 		nanoSecs,
 		levelid,
 		level,
-		str,
+		str:gsub("\t", string.rep("&nbsp;", config.htmlTabWidth)),
 		bodyIndent)
 	else
 		logStr = logStr .. "\n"
