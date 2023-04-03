@@ -2,9 +2,15 @@ local path, useHTML =  ...
 local logDataChannel = love.thread.getChannel "logData"
 local signal_shutdown = "__SHUTTING_DOWN__"
 local signal_init = "__MANAGE_OLD_LOGS__"
+local signal_create = "__CREATE_NEW_LOG__"
 local format = string.format
 
 print "Ent logWriter thread started"
+
+function createNewLog(logPath)
+	love.filesystem.write(logPath, "")
+	print("Created log file at " .. logPath)
+end
 
 function manageOldLogs(title, ext, outputPath, maxOldLogs)
 	-- move old logs
@@ -34,9 +40,13 @@ while true do
 	if str == signal_shutdown then
 		print "Ent logWriter thread shutting down"
 		break
-	
+
 	elseif str == signal_init then
 		manageOldLogs(unpack(logDataChannel:demand()))
+
+	elseif str == signal_create then
+		createNewLog(logDataChannel:demand())
+
 	else
 		love.filesystem.append(path, str)
 	end

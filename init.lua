@@ -59,6 +59,8 @@ local templatePath = srcPath .. "/template.html"
 local logWriter = love.thread.newThread(writerPath)
 local logWriterChannel = love.thread.getChannel "logData"
 local signal_shutdown = "__SHUTTING_DOWN__"
+local signal_init = "__MANAGE_OLD_LOGS__"
+local signal_create = "__CREATE_NEW_LOG__"
 
 -- misc
 local initTime = getTime()
@@ -116,24 +118,16 @@ local function loadTemplate(logName, logPath)
 end
 
 local function createLog(logName, logPath)
-	-- ensure that the ouput dir exists
-	local dirInfo = love.filesystem.getInfo(config.outputPath, "directory")
-	if not dirInfo then
-		assert(love.filesystem.createDirectory(config.outputPath), "Error creating log output directory")
-		_print "Created log output directory"
-	end
+	logWriterChannel:push(signal_create)
+	logWriterChannel:push(logPath)
 
 	if config.useHTML then
 		local head, tail, indent = loadTemplate(logName)
-		assert(love.filesystem.write(logPath, concat(head, "\n")), "Error creating logfile at " .. logPath)
+		logWriterChannel:push(concat(head, "\n"))
 		-- these values are needed later
 		templateTail = concat(tail, "\n")
 		bodyIndent = indent
-	else
-		assert(love.filesystem.write(logPath, ""), "Error creating logfile at " .. logPath)
 	end
-	_print("Created log file at " .. logPath)
-
 end
 
 local function manageOldLogs(title, ext)
@@ -141,7 +135,7 @@ local function manageOldLogs(title, ext)
 		return
 	end
 
-	logWriterChannel:push "__MANAGE_OLD_LOGS__"
+	logWriterChannel:push(signal_init)
 	logWriterChannel:push {title, ext, config.outputPath, config.maxOldLogs}
 end
 
@@ -191,7 +185,13 @@ function ent.init(inConfig)
 	local logName = format("%s.0.%s", config.title, ext)
 	local logPath = format("%s/%s", config.outputPath, logName)
 
-
+	-- ensure that the ouput dir exists
+	local dirInfo = love.filesystem.getInfo(config.outputPath, "directory")
+	if not dirInfo then
+		assert(love.filesystem.createDirectory(config.outputPath), "Error creating log output directory")
+		_print "Created log output directory"
+	end
+	
 	-- boot up the thread
 	logWriter:start(logPath)
 
@@ -234,7 +234,6 @@ end
 function ent.close()
 	if config.useHTML then
 		logWriterChannel:push(templateTail)
-		-- hasInit = false
 	end
 
 	logWriterChannel:push(signal_shutdown)
