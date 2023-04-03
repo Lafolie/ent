@@ -167,7 +167,7 @@ Type: string
 
 Default: `love.filesystem.getIdentity()`
 
-Sets the log file title. A timestamp will be appended to the title. Avoid using characters that are illegal on some filesystems (such as NTFS).
+Sets the log file title. Avoid using characters that are illegal on some filesystems (such as NTFS).
 
 ---
 
