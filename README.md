@@ -47,6 +47,24 @@ A configuration table can be passed to `ent.init` (see below for options), and 7
 
  These output functions use the same signature as `string.format` and will format the string accordingly, returning the string that was printed to the log file and console.
 
+## Log Filenames
+
+Log files are saved using the format `name.x.ext`.
+
+The name is provided from the init config (defaults to the game identity string), and the extension is either "log" or "html".
+
+For `x` is substituted with a number. The latest log file will always use `0`, allowing you to simply refresh your editor/browser tab to view the latest log file.
+
+Old log management & removal is done in the writer thread, minimising startup cost.
+
+## Love Error Screen
+
+Whilst developing your game you will often encounter crashes and be presented with the Love error screen. The crash screen is actually overridable, via the [love.errorhandler](https://love2d.org/wiki/love.errorhandler) callback.
+
+It is recommended to override this function (using the default implementation of the previously linked page is fine), adding a call to `ent.close` in the handler. This will ensure that ent shuts down properly in the event of a crash (i.e. the HTML footer written, threads closed, etc).
+
+It is also recommended to log the error message with ent before calling `ent.close`.
+
 # API
 
 ## `ent.init(config)`
@@ -55,7 +73,7 @@ A configuration table can be passed to `ent.init` (see below for options), and 7
  ### Returns
  * `nil`
 
-Intialises the module; creates the writer thread, the log file and its directory, and removes any old log files. If the auto removal feature is used, a `.entLogMeta` file will also be created to track logs.
+Intialises the module; creates the writer thread, the log file and its directory, and removes any old log files. 
 
 This function can only be called once - Ent can create a single log file per session.
 
@@ -71,6 +89,18 @@ See below for configuration options.
 
 Closes the writer thread and writes any pending data (such as the HTML footer).
 
+It is recommended to call this function in `love.quit` and `love.errorhandler`.
+
+---
+
+## `ent.hasInit()`
+ ### Args
+ * none
+ ### Returns
+ * `hasInit` (bool) : whether the system has been initiated already
+
+This function is useful if you implement a soft reset and have a call to `ent.init` in the reset routine.
+
 ---
 
 ## `output = ent.echo(str, ...)`
@@ -78,7 +108,7 @@ Closes the writer thread and writes any pending data (such as the HTML footer).
  * `str` (string) : string to output, may be formatted by `...`
  * `...` (vararg) : format variables for `str`
  ### Returns
- * `ouput` (string) : the string output to the logfile/console
+ * `ouput` (string) : the string output to the logfile and console
 
 Outputs the string `str` formatted by `...` to the log file and stdout.
 A timestamp and the log level will be prepended to the output.

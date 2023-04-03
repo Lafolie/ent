@@ -141,25 +141,8 @@ local function manageOldLogs(title, ext)
 		return
 	end
 
-	-- move old logs
-	local nameStr = "%s.%i." .. ext
-	for n = config.maxOldLogs - 1, 0, -1 do
-		local name = format(nameStr, title, n)
-		local path = format("%s/%s", config.outputPath, name)
-		
-		if love.filesystem.getInfo(path, "file") then
-			local oldLog = love.filesystem.read(path)
-			local newName = format(nameStr, title, n + 1)
-			love.filesystem.write(format("%s/%s", config.outputPath, newName), oldLog)
-		end
-	end
-
-	-- delete oldest log
-	local name = format(nameStr, title, config.maxOldLogs)
-	if love.filesystem.remove(format("%s/%s", config.outputPath, name)) then
-		local outputf = ent.info or _print
-		outputf("Removed old log file %s", name)
-	end
+	logWriterChannel:push "__MANAGE_OLD_LOGS__"
+	logWriterChannel:push {title, ext, config.outputPath, config.maxOldLogs}
 end
 
 -------------------------------------------------------------------------------
@@ -217,6 +200,9 @@ function ent.init(inConfig)
 	createLog(logName, logPath)
 end
 
+function ent.hasInit()
+	return hasInit
+end
 
 function ent.print(levelid, level, str, ...)
 	str = format(tostring(str), ...)
