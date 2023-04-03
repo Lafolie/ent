@@ -53,9 +53,9 @@ Log files are saved using the format `name.x.ext`.
 
 The name is provided from the init config (defaults to the game identity string), and the extension is either "log" or "html".
 
-For `x` is substituted with a number. The latest log file will always use `0`, allowing you to simply refresh your editor/browser tab to view the latest log file.
+The `x` is substituted with a number. The latest log file will always use `0`, allowing you to simply refresh your editor/browser tab to view the latest log file.
 
-Old log management & removal is done in the writer thread, minimising startup cost.
+Log management & removal is done in the writer thread, minimising startup cost.
 
 ## Love Error Screen
 
